@@ -1,0 +1,103 @@
+/* Overall container */
+.signup-container {
+  min-height: 100vh;
+  background: #f1f1f1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+}
+
+/* Top blue header */
+.signup-header {
+  width: 100%;
+  height: 80px;
+  background-color: #3498db;
+}
+
+/* Toggle buttons */
+.form-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+  background: white;
+  border-radius: 30px;
+  overflow: hidden;
+  width: 90%;
+  max-width: 740px;
+}
+
+.toggle-btn {
+  padding: 10px 30px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  text-align: center;
+  width: 90%;
+  max-width: 740px;
+}
+
+.toggle-btn.active {
+  background-color: #1abc9c;
+  color: white;
+}
+
+/* Form design */
+.signup-form {
+  /* background: white; */
+  margin-top: 20px;
+  padding: 30px;
+  width: 90%;
+  max-width: 740px;
+  border-radius: 10px;
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
+}
+
+/* Form rows (for side-by-side fields) */
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* Form groups */
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.form-group input {
+  padding: 12px 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+/* Error message */
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  padding-left: 15px;
+  text-align: left;
+}
+
+/* Submit button */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #1abc9c;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background-color: #16a085;
+}

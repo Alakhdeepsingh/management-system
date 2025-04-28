@@ -1,0 +1,55 @@
+.incident-list-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar input {
+  padding: 8px;
+  width: 50%;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.incident-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.incident-table th,
+.incident-table td {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+.incident-table th {
+  background-color: #f4f4f4;
+}
+
+.incident-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.incident-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.incident-table td {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
