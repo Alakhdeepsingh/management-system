@@ -5,7 +5,6 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa'; // For eye icons from FontAw
 
 const Login = () => {
     const savedUser = JSON.parse(localStorage.getItem('users')) || []; // Retrieve the user data from localStorage
-    console.log("savedUser", savedUser);
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -33,7 +32,6 @@ const Login = () => {
         );
 
         if (matchedUser) {
-            console.log("matchedUser", matchedUser);
 
             // ✅ Save current user's email to localStorage
             localStorage.setItem("currentUserEmail", matchedUser.email);

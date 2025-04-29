@@ -1,46 +1,62 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./IncidentList.css"; // Import your CSS file for styling
+import "./IncidentList.css"; // Import custom CSS styles
 
 const IncidentList = () => {
-    const [incidents, setIncidents] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const navigate = useNavigate();
+    const [incidents, setIncidents] = useState([]); // Holds the list of incidents for the logged-in user
+    const [searchQuery, setSearchQuery] = useState(""); // Stores search input text
+    const navigate = useNavigate(); // React Router hook for navigation
 
     useEffect(() => {
-        // Get current logged-in user's email from localStorage
+        // Retrieve the current user's email from localStorage
         const currentUserEmail = localStorage.getItem("currentUserEmail");
 
+
+        // If no user is logged in, redirect to the login/home page
         if (!currentUserEmail) {
-            navigate("/"); // Redirect to login if no user is logged in
+            navigate("/");
             return;
         }
 
-        // Get incidents stored under the current user's email
-        const allIncidents = JSON.parse(localStorage.getItem("incidents")) || {};
+        // Get all incidents from localStorage, or use empty object if null
+        const allIncidents = JSON.parse(localStorage.getItem("userIncidents")) || {};
 
-        // Fetch the incidents for the logged-in user
+
+        // Extract only incidents belonging to the currently logged-in user
         const userIncidents = allIncidents[currentUserEmail] || [];
+
+        // Update state with user's incidents
         setIncidents(userIncidents);
     }, [navigate]);
 
+    // Handle logout functionality
     const handleLogout = () => {
-        localStorage.removeItem("currentUserEmail"); // Remove logged-in user's email from localStorage
-        navigate("/"); // Redirect to home or login
+        localStorage.removeItem("currentUserEmail"); // Clear session
+        navigate("/"); // Redirect to login/home
     };
 
-    const filteredIncidents = incidents.filter(incident =>
+    // Filter incidents based on the incident ID search query (case-insensitive)
+    const filteredIncidents = incidents.filter((incident) =>
         incident.incidentID.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <div className="incident-list-container">
+            {/* Header */}
             <div className="header">
                 <h2>Incident List</h2>
             </div>
-            <button onClick={handleLogout} className="logout-btn" style={{ marginBottom: "20px" }}>
+
+            {/* Logout button */}
+            <button
+                onClick={handleLogout}
+                className="logout-btn"
+                style={{ marginBottom: "20px" }}
+            >
                 Logout
             </button>
+
+            {/* Search input field */}
             <div className="search-bar">
                 <input
                     type="text"
@@ -49,6 +65,8 @@ const IncidentList = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
+
+            {/* Incident list table */}
             <table className="incident-table">
                 <thead>
                     <tr>
@@ -62,7 +80,6 @@ const IncidentList = () => {
                 <tbody>
                     {filteredIncidents.length > 0 ? (
                         filteredIncidents.map((incident) => {
-                            console.log("incident", incident);
                             return (
                                 <tr key={incident.incidentID}>
                                     <td>{incident.incidentID}</td>
@@ -74,12 +91,12 @@ const IncidentList = () => {
                             );
                         })
                     ) : (
+                        // Fallback row when no incidents match the filter
                         <tr>
                             <td colSpan="5">No incidents found</td>
                         </tr>
                     )}
                 </tbody>
-
             </table>
         </div>
     );

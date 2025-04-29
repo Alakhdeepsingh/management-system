@@ -124,7 +124,6 @@ const Signup = () => {
 
         if (validateForm()) {
             // Get the formData from the state or form fields
-            console.log("formData", formData);
 
             // Get the existing users from localStorage (or initialize an empty array if none exist)
             let users = JSON.parse(localStorage.getItem('users')) || [];
