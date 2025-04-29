@@ -28,23 +28,26 @@ const Login = () => {
     const handleLogin = (e) => {
         e.preventDefault();
 
-        // Find the user who matches the entered email and password
-        const matchedUser = savedUser.find(user => user.email === email && user.password === password);
+        const matchedUser = savedUser.find(
+            user => user.email === email && user.password === password
+        );
 
         if (matchedUser) {
             console.log("matchedUser", matchedUser);
 
-            // Save only the logged-in user
-            localStorage.setItem("user", JSON.stringify(matchedUser));
+            // ✅ Save current user's email to localStorage
+            localStorage.setItem("currentUserEmail", matchedUser.email);
+
             navigate("/dashboard");
         } else {
             setError("Invalid email or password");
         }
     };
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword); // Toggle the state
-    };
+
+    // const togglePasswordVisibility = () => {
+    //     setShowPassword(!showPassword); // Toggle the state
+    // };
 
     return (
         <div className="login-container">

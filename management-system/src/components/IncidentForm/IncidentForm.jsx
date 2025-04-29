@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
-import './IncidentForm.css'; // Import your CSS file for styling
+import React, { useState, useEffect } from 'react';
+import './IncidentForm.css';
 import { useNavigate } from 'react-router-dom';
 
 const IncidentForm = () => {
-    // State to store form data
     const [incidentType, setIncidentType] = useState('Enterprise');
-    const [reporterName, setReporterName] = useState('');
     const [incidentDetails, setIncidentDetails] = useState('');
     const [priority, setPriority] = useState('Medium');
     const [status, setStatus] = useState('Open');
+    const [reporterName, setReporterName] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const currentUserEmail = localStorage.getItem("currentUserEmail");
+
+        if (!currentUserEmail) {
+            alert("User not logged in.");
+            navigate("/");
+            return;
+        }
+
+        const currentUser = users.find(user => user.email === currentUserEmail);
+
+        if (currentUser) {
+            setReporterName(currentUser.firstName);
+        } else {
+            alert("User not found.");
+            navigate("/");
+        }
+    }, [navigate]);
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -26,17 +46,23 @@ const IncidentForm = () => {
             priority,
             status,
             reporterName,
+            incidentType,
             createdAt: new Date().toISOString(),
         };
 
-        const existingIncidents = JSON.parse(localStorage.getItem("incidents")) || [];
-        existingIncidents.push(newIncident);
-        localStorage.setItem("incidents", JSON.stringify(existingIncidents));
+        const currentUserEmail = localStorage.getItem("currentUserEmail");
+        const allUserIncidents = JSON.parse(localStorage.getItem("userIncidents")) || {};
 
-        // Navigate to listing page
+        if (!allUserIncidents[currentUserEmail]) {
+            allUserIncidents[currentUserEmail] = [];
+        }
+
+        allUserIncidents[currentUserEmail].push(newIncident);
+
+        localStorage.setItem("userIncidents", JSON.stringify(allUserIncidents));
+
         navigate("/incidentlist");
     };
-
 
     return (
         <div className="incident-form-container">
@@ -55,13 +81,12 @@ const IncidentForm = () => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="reporterName">Reporter Name:</label>
+                    <label>Reporter Name:</label>
                     <input
                         type="text"
-                        id="reporterName"
                         value={reporterName}
-                        onChange={(e) => setReporterName(e.target.value)}
-                        required
+                        readOnly
+                        disabled
                     />
                 </div>
 

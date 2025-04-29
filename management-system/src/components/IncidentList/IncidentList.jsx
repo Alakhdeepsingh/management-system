@@ -1,21 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // <-- Add this line
+import { useNavigate } from "react-router-dom";
 import "./IncidentList.css"; // Import your CSS file for styling
 
 const IncidentList = () => {
     const [incidents, setIncidents] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const navigate = useNavigate(); // <-- Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const storedIncidents = JSON.parse(localStorage.getItem("incidents")) || [];
-        setIncidents(storedIncidents);
-    }, []);
+        // Get current logged-in user's email from localStorage
+        const currentUserEmail = localStorage.getItem("currentUserEmail");
+
+        if (!currentUserEmail) {
+            navigate("/"); // Redirect to login if no user is logged in
+            return;
+        }
+
+        // Get incidents stored under the current user's email
+        const allIncidents = JSON.parse(localStorage.getItem("incidents")) || {};
+
+        // Fetch the incidents for the logged-in user
+        const userIncidents = allIncidents[currentUserEmail] || [];
+        setIncidents(userIncidents);
+    }, [navigate]);
 
     const handleLogout = () => {
-        // Clear user session or entire localStorage (as per your logic)
-        // localStorage.clear(); // Clears everything
-        localStorage.removeItem("users"); // Example: Clear only user info
+        localStorage.removeItem("currentUserEmail"); // Remove logged-in user's email from localStorage
         navigate("/"); // Redirect to home or login
     };
 
@@ -25,10 +35,8 @@ const IncidentList = () => {
 
     return (
         <div className="incident-list-container">
-
             <div className="header">
                 <h2>Incident List</h2>
-
             </div>
             <button onClick={handleLogout} className="logout-btn" style={{ marginBottom: "20px" }}>
                 Logout
@@ -40,9 +48,7 @@ const IncidentList = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
-
             </div>
-
             <table className="incident-table">
                 <thead>
                     <tr>
@@ -55,21 +61,25 @@ const IncidentList = () => {
                 </thead>
                 <tbody>
                     {filteredIncidents.length > 0 ? (
-                        filteredIncidents.map((incident) => (
-                            <tr key={incident.incidentID}>
-                                <td>{incident.incidentID}</td>
-                                <td>{incident.incidentDetails}</td>
-                                <td>{incident.priority}</td>
-                                <td>{incident.status}</td>
-                                <td>{incident.reporterName}</td>
-                            </tr>
-                        ))
+                        filteredIncidents.map((incident) => {
+                            console.log("incident", incident);
+                            return (
+                                <tr key={incident.incidentID}>
+                                    <td>{incident.incidentID}</td>
+                                    <td>{incident.incidentDetails}</td>
+                                    <td>{incident.priority}</td>
+                                    <td>{incident.status}</td>
+                                    <td>{incident.reporterName}</td>
+                                </tr>
+                            );
+                        })
                     ) : (
                         <tr>
                             <td colSpan="5">No incidents found</td>
                         </tr>
                     )}
                 </tbody>
+
             </table>
         </div>
     );
