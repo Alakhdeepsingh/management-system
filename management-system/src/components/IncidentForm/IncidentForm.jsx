@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './IncidentForm.css'; // Import your CSS file for styling
+import { useNavigate } from 'react-router-dom';
 
 const IncidentForm = () => {
     // State to store form data
@@ -8,20 +9,17 @@ const IncidentForm = () => {
     const [incidentDetails, setIncidentDetails] = useState('');
     const [priority, setPriority] = useState('Medium');
     const [status, setStatus] = useState('Open');
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Check if all fields are filled
         if (!incidentDetails || !priority || !status || !reporterName) {
             alert("Please fill out all required fields.");
             return;
         }
 
-        // Generate a unique Incident ID (can also be handled via backend)
         const incidentID = `RMG${Math.floor(Math.random() * 100000)}${new Date().getFullYear()}`;
-
-        // Store the incident in localStorage (append to an existing array of incidents)
         const newIncident = {
             incidentID,
             incidentDetails,
@@ -35,7 +33,7 @@ const IncidentForm = () => {
         existingIncidents.push(newIncident);
         localStorage.setItem("incidents", JSON.stringify(existingIncidents));
 
-        // Redirect to the Incident List page
+        // Navigate to listing page
         navigate("/incidentlist");
     };
 

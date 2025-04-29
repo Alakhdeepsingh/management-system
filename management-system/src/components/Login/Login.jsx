@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
-// import { Icon } from 'react-icons-kit';
-// import { eyeOff } from 'react-icons-kit/feather/eyeOff';
-// import { eye } from 'react-icons-kit/feather/eye'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // For eye icons from FontAwesome
 
 const Login = () => {
     const savedUser = JSON.parse(localStorage.getItem('users')) || []; // Retrieve the user data from localStorage
@@ -13,7 +11,19 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState(""); // For error message
     const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+    const [type, setType] = useState('password');
+    const [icon, setIcon] = useState(FaEyeSlash); // Initial icon
     const navigate = useNavigate(); // To redirect to dashboard
+
+    const handleToggle = () => {
+        if (type === 'password') {
+            setIcon(FaEye);
+            setType('text');
+        } else {
+            setIcon(FaEyeSlash);
+            setType('password');
+        }
+    }
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -31,7 +41,6 @@ const Login = () => {
             setError("Invalid email or password");
         }
     };
-
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword); // Toggle the state
@@ -53,14 +62,14 @@ const Login = () => {
                     />
                     <div className="password-wrapper">
                         <input
-                            type={showPassword ? "text" : "password"} // Toggle password visibility
+                            type={type} // Toggle password visibility
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
-                        <span className="eye-icon" onClick={togglePasswordVisibility}>
-                            {showPassword ? "🙈" : "👁️"} {/* Change icon based on visibility */}
+                        <span className="eye-icon" onClick={handleToggle}>
+                            {icon} {/* Render the FaEye or FaEyeSlash icon directly */}
                         </span>
                     </div>
                     <div className="forgot-password">
@@ -71,7 +80,6 @@ const Login = () => {
                     </div>
                     <div>
                         <button type="submit">LOG ME IN</button>
-
                     </div>
                 </form>
             </div>

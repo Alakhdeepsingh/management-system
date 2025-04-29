@@ -1,26 +1,38 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // <-- Add this line
 import "./IncidentList.css"; // Import your CSS file for styling
 
 const IncidentList = () => {
     const [incidents, setIncidents] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const navigate = useNavigate(); // <-- Initialize navigate
 
     useEffect(() => {
-        // Fetch incidents from localStorage
         const storedIncidents = JSON.parse(localStorage.getItem("incidents")) || [];
         setIncidents(storedIncidents);
     }, []);
 
-    // Filter incidents based on search query (search by Incident ID)
+    const handleLogout = () => {
+        // Clear user session or entire localStorage (as per your logic)
+        // localStorage.clear(); // Clears everything
+        localStorage.removeItem("users"); // Example: Clear only user info
+        navigate("/"); // Redirect to home or login
+    };
+
     const filteredIncidents = incidents.filter(incident =>
         incident.incidentID.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <div className="incident-list-container">
-            <h2>Incident List</h2>
 
-            {/* Search Input */}
+            <div className="header">
+                <h2>Incident List</h2>
+
+            </div>
+            <button onClick={handleLogout} className="logout-btn" style={{ marginBottom: "20px" }}>
+                Logout
+            </button>
             <div className="search-bar">
                 <input
                     type="text"
@@ -28,9 +40,9 @@ const IncidentList = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
+
             </div>
 
-            {/* Incident Table */}
             <table className="incident-table">
                 <thead>
                     <tr>

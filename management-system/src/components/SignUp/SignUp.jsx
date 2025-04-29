@@ -23,28 +23,99 @@ const Signup = () => {
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // If the field is pincode, trigger the API call
+        if (name === "pincode" && value.length === 6) {
+            fetchLocationData(value);
+        }
     };
+
+    const fetchLocationData = async (pincode) => {
+        try {
+            const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+            const data = await response.json();
+
+            if (data[0].Status === "Success") {
+                const postOffice = data[0].PostOffice[0];
+
+                setFormData(prev => ({
+                    ...prev,
+                    country: "India",
+                    state: postOffice.State,
+                    city: postOffice.District,
+                }));
+            } else {
+                console.error("Invalid Pincode");
+            }
+        } catch (error) {
+            console.error("Error fetching location data:", error);
+        }
+    };
+
 
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.firstName.trim()) newErrors.firstName = "Please enter valid First Name.";
-        if (!formData.lastName.trim()) newErrors.lastName = "Please Enter Valid Last Name.";
-        if (!formData.email.trim()) newErrors.email = "Please enter valid email.";
-        if (!formData.address.trim()) newErrors.address = "Please enter valid address.";
-        if (!formData.country.trim()) newErrors.country = "Please select your country.";
-        if (!formData.state.trim()) newErrors.state = "Please select your state.";
-        if (!formData.city.trim()) newErrors.city = "Please select your city.";
-        if (!formData.pincode.trim()) newErrors.pincode = "Please enter valid pincode.";
-        if (!formData.mobile.trim()) newErrors.mobile = "Mobile Number is required.";
-        if (!formData.password.trim()) newErrors.password = "Must contain at least one number, one uppercase letter, and one lowercase letter, and be at least 8 characters long.";
+        const nameRegex = /^[A-Za-z\s]{2,}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const mobileRegex = /^[6-9]\d{9}$/;
+        const addressRegex = /^[a-zA-Z0-9\s,.'-]{10,}$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const locationRegex = /^[A-Za-z\s]+$/; // for country, state, city
+
+        if (!nameRegex.test(formData.firstName)) {
+            newErrors.firstName = "Enter a valid First Name (only letters, min 2 characters).";
+        }
+
+        if (!nameRegex.test(formData.lastName)) {
+            newErrors.lastName = "Enter a valid Last Name (only letters, min 2 characters).";
+        }
+
+        if (!emailRegex.test(formData.email)) {
+            newErrors.email = "Enter a valid Email.";
+        }
+
+        if (!addressRegex.test(formData.address)) {
+            newErrors.address = "Enter a valid Address (min 10 characters).";
+        }
+
+        if (!formData.country.trim()) {
+            newErrors.country = "Please select your country.";
+        } else if (!locationRegex.test(formData.country)) {
+            newErrors.country = "Country name should contain only letters.";
+        }
+
+        if (!formData.state.trim()) {
+            newErrors.state = "Please select your state.";
+        } else if (!locationRegex.test(formData.state)) {
+            newErrors.state = "State name should contain only letters.";
+        }
+
+        if (!formData.city.trim()) {
+            newErrors.city = "Please select your city.";
+        } else if (!locationRegex.test(formData.city)) {
+            newErrors.city = "City name should contain only letters.";
+        }
+
+        if (!/^\d{6}$/.test(formData.pincode)) {
+            newErrors.pincode = "Enter a valid 6-digit Pincode.";
+        }
+
+        if (!mobileRegex.test(formData.mobile)) {
+            newErrors.mobile = "Enter a valid 10-digit Mobile Number starting with 6-9.";
+        }
+
+        if (!passwordRegex.test(formData.password)) {
+            newErrors.password = "Password must be 8+ characters, include upper/lowercase & number.";
+        }
+
         if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = "Confirm Password should be the same as Password.";
+            newErrors.confirmPassword = "Passwords do not match.";
         }
 
         setErrors(newErrors);
-
         return Object.keys(newErrors).length === 0;
     };
 
@@ -140,9 +211,24 @@ const Signup = () => {
                         {errors.pincode && <span className="error">{errors.pincode}</span>}
                     </div>
                 </div>
-
                 <div className="form-group">
-                    <input type="text" name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                            type="text"
+                            name="countryCode"
+                            placeholder="+91"
+                            value={formData.countryCode}
+                            onChange={handleChange}
+                            style={{ width: '70px' }}
+                        />
+                        <input
+                            type="text"
+                            name="mobile"
+                            placeholder="Mobile Number"
+                            value={formData.mobile}
+                            onChange={handleChange}
+                        />
+                    </div>
                     {errors.mobile && <span className="error">{errors.mobile}</span>}
                 </div>
 
