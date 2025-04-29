@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import "./Signup.css";
 
 const Signup = () => {
@@ -20,40 +19,56 @@ const Signup = () => {
 
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState("");
+    const [countries, setCountries] = useState([]);
+    const [states, setStates] = useState([]);
+    const [cities, setCities] = useState([]);
     const navigate = useNavigate();
+
+    const API_KEY = "QUlGamNYN1dUblVvSENNZlpTdjRXOTBKWUxlNmk5WTRPM29ZZDlJbA==";
+
+    useEffect(() => {
+        fetch("https://api.countrystatecity.in/v1/countries", {
+            headers: { "X-CSCAPI-KEY": API_KEY },
+        })
+            .then(res => res.json())
+            .then(data => setCountries(data))
+            .catch(err => console.error("Failed to load countries:", err));
+    }, []);
+
+    useEffect(() => {
+        if (formData.country) {
+            fetch(`https://api.countrystatecity.in/v1/countries/${formData.country}/states`, {
+                headers: { "X-CSCAPI-KEY": API_KEY },
+            })
+                .then(res => res.json())
+                .then(data => setStates(data))
+                .catch(err => console.error("Failed to load states:", err));
+        }
+    }, [formData.country]);
+
+    useEffect(() => {
+        if (formData.state) {
+            fetch(
+                `https://api.countrystatecity.in/v1/countries/${formData.country}/states/${formData.state}/cities`,
+                {
+                    headers: { "X-CSCAPI-KEY": API_KEY },
+                }
+            )
+                .then(res => res.json())
+                .then(data => setCities(data))
+                .catch(err => console.error("Failed to load cities:", err));
+        }
+    }, [formData.state]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-
-        // If the field is pincode, trigger the API call
-        if (name === "pincode" && value.length === 6) {
-            fetchLocationData(value);
-        }
+        setFormData(prev => ({
+            ...prev,
+            [name]: value,
+            ...(name === "country" ? { state: "", city: "" } : {}),
+            ...(name === "state" ? { city: "" } : {}),
+        }));
     };
-
-    const fetchLocationData = async (pincode) => {
-        try {
-            const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-            const data = await response.json();
-
-            if (data[0].Status === "Success") {
-                const postOffice = data[0].PostOffice[0];
-
-                setFormData(prev => ({
-                    ...prev,
-                    country: "India",
-                    state: postOffice.State,
-                    city: postOffice.District,
-                }));
-            } else {
-                console.error("Invalid Pincode");
-            }
-        } catch (error) {
-            console.error("Error fetching location data:", error);
-        }
-    };
-
 
     const validateForm = () => {
         const newErrors = {};
@@ -63,7 +78,7 @@ const Signup = () => {
         const mobileRegex = /^[6-9]\d{9}$/;
         const addressRegex = /^[a-zA-Z0-9\s,.'-]{10,}$/;
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        const locationRegex = /^[A-Za-z\s]+$/; // for country, state, city
+        const locationRegex = /^[A-Za-z\s]+$/;
 
         if (!nameRegex.test(formData.firstName)) {
             newErrors.firstName = "Enter a valid First Name (only letters, min 2 characters).";
@@ -81,22 +96,16 @@ const Signup = () => {
             newErrors.address = "Enter a valid Address (min 10 characters).";
         }
 
-        if (!formData.country.trim()) {
+        if (!formData.country) {
             newErrors.country = "Please select your country.";
-        } else if (!locationRegex.test(formData.country)) {
-            newErrors.country = "Country name should contain only letters.";
         }
 
-        if (!formData.state.trim()) {
+        if (!formData.state) {
             newErrors.state = "Please select your state.";
-        } else if (!locationRegex.test(formData.state)) {
-            newErrors.state = "State name should contain only letters.";
         }
 
-        if (!formData.city.trim()) {
+        if (!formData.city) {
             newErrors.city = "Please select your city.";
-        } else if (!locationRegex.test(formData.city)) {
-            newErrors.city = "City name should contain only letters.";
         }
 
         if (!/^\d{6}$/.test(formData.pincode)) {
@@ -123,34 +132,23 @@ const Signup = () => {
         e.preventDefault();
 
         if (validateForm()) {
-            // Get the formData from the state or form fields
-
-            // Get the existing users from localStorage (or initialize an empty array if none exist)
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-
-            // Check if the email already exists in the users list (you might want to prevent duplicates)
+            let users = JSON.parse(localStorage.getItem("users")) || [];
             const existingUser = users.find(user => user.email === formData.email);
+
             if (existingUser) {
-                setErrorMessage("This email is already registered. Please use a different one.");
+                setErrors({ email: "This email is already registered." });
                 return;
             }
 
-            // Add the new user to the users array
             users.push(formData);
-
-            // Save the updated users array back to localStorage
-            localStorage.setItem('users', JSON.stringify(users));
-
-            // Set the success message
+            localStorage.setItem("users", JSON.stringify(users));
             setSuccessMessage("Signup successful! Redirecting to login...");
 
-            // Redirect to login after 2 seconds (to show the success message)
             setTimeout(() => {
                 navigate("/");
             }, 2000);
         }
     };
-
 
     return (
         <div className="signup-container">
@@ -161,11 +159,7 @@ const Signup = () => {
                 <button className="toggle-btn active">SIGNUP</button>
             </div>
 
-            {successMessage && (
-                <div className="success-message">
-                    {successMessage}
-                </div>
-            )}
+            {successMessage && <div className="success-message">{successMessage}</div>}
 
             <form className="signup-form" onSubmit={handleSubmit}>
                 <div className="form-row">
@@ -191,18 +185,33 @@ const Signup = () => {
 
                 <div className="form-row">
                     <div className="form-group">
-                        <input type="text" name="country" placeholder="Country" value={formData.country} onChange={handleChange} />
+                        <select name="country" value={formData.country} onChange={handleChange}>
+                            <option value="">Select Country</option>
+                            {countries.map(c => (
+                                <option key={c.iso2} value={c.iso2}>{c.name}</option>
+                            ))}
+                        </select>
                         {errors.country && <span className="error">{errors.country}</span>}
                     </div>
                     <div className="form-group">
-                        <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleChange} />
+                        <select name="state" value={formData.state} onChange={handleChange} disabled={!states.length}>
+                            <option value="">Select State</option>
+                            {states.map(s => (
+                                <option key={s.iso2} value={s.iso2}>{s.name}</option>
+                            ))}
+                        </select>
                         {errors.state && <span className="error">{errors.state}</span>}
                     </div>
                 </div>
 
                 <div className="form-row">
                     <div className="form-group">
-                        <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleChange} />
+                        <select name="city" value={formData.city} onChange={handleChange} disabled={!cities.length}>
+                            <option value="">Select City</option>
+                            {cities.map(city => (
+                                <option key={city.id} value={city.name}>{city.name}</option>
+                            ))}
+                        </select>
                         {errors.city && <span className="error">{errors.city}</span>}
                     </div>
                     <div className="form-group">
@@ -210,15 +219,16 @@ const Signup = () => {
                         {errors.pincode && <span className="error">{errors.pincode}</span>}
                     </div>
                 </div>
+
                 <div className="form-group">
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: "flex", gap: "8px" }}>
                         <input
                             type="text"
                             name="countryCode"
                             placeholder="+91"
-                            value={formData.countryCode}
+                            value={formData.countryCode || "+91"}
                             onChange={handleChange}
-                            style={{ width: '70px' }}
+                            style={{ width: "70px" }}
                         />
                         <input
                             type="text"
