@@ -40,6 +40,11 @@ const IncidentList = () => {
         incident.incidentID.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const handleEdit = (id) => {
+        navigate(`/edit-incident/${id}`);
+    };
+
+
     return (
         <div className="incident-list-container">
             {/* Header */}
@@ -87,6 +92,11 @@ const IncidentList = () => {
                                     <td>{incident.priority}</td>
                                     <td>{incident.status}</td>
                                     <td>{incident.reporterName}</td>
+                                    <td>
+                                        <button onClick={() => handleEdit(incident.incidentID)}>
+                                            Edit
+                                        </button>
+                                    </td>
                                 </tr>
                             );
                         })

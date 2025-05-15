@@ -6,7 +6,7 @@ const IncidentForm = () => {
     const [incidentType, setIncidentType] = useState('Enterprise');
     const [incidentDetails, setIncidentDetails] = useState('');
     const [priority, setPriority] = useState('Medium');
-    const [status, setStatus] = useState('Open');
+    // const [status, setStatus] = useState('Open');
     const [reporterName, setReporterName] = useState('');
     const navigate = useNavigate();
 
@@ -34,35 +34,43 @@ const IncidentForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!incidentDetails || !priority || !status || !reporterName) {
+        if (!incidentDetails || !priority || !reporterName) {
             alert("Please fill out all required fields.");
             return;
         }
 
-        const incidentID = `RMG${Math.floor(Math.random() * 100000)}${new Date().getFullYear()}`;
+        const currentUserEmail = localStorage.getItem("currentUserEmail");
+        const allUserIncidents = JSON.parse(localStorage.getItem("userIncidents")) || {};
+
+        // Gather all incident IDs across all users
+        const allIncidentIDs = Object.values(allUserIncidents).flat().map(incident => incident.incidentID);
+
+        // Generate a unique incident ID
+        let incidentID;
+        do {
+            incidentID = `RMG${Math.floor(Math.random() * 100000)}${new Date().getFullYear()}`;
+        } while (allIncidentIDs.includes(incidentID));
+
         const newIncident = {
             incidentID,
             incidentDetails,
             priority,
-            status,
+            status: 'Open',
             reporterName,
             incidentType,
             createdAt: new Date().toISOString(),
         };
-
-        const currentUserEmail = localStorage.getItem("currentUserEmail");
-        const allUserIncidents = JSON.parse(localStorage.getItem("userIncidents")) || {};
 
         if (!allUserIncidents[currentUserEmail]) {
             allUserIncidents[currentUserEmail] = [];
         }
 
         allUserIncidents[currentUserEmail].push(newIncident);
-
         localStorage.setItem("userIncidents", JSON.stringify(allUserIncidents));
 
         navigate("/incidentlist");
     };
+
 
     return (
         <div className="incident-form-container">
@@ -113,7 +121,7 @@ const IncidentForm = () => {
                     </select>
                 </div>
 
-                <div className="form-group">
+                {/* <div className="form-group">
                     <label htmlFor="status">Status:</label>
                     <select
                         id="status"
@@ -124,7 +132,7 @@ const IncidentForm = () => {
                         <option value="In Progress">In Progress</option>
                         <option value="Closed">Closed</option>
                     </select>
-                </div>
+                </div> */}
 
                 <button type="submit">Create Incident</button>
             </form>

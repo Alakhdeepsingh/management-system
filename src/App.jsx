@@ -6,6 +6,7 @@ import Signup from './components/SignUp/SignUp';
 import Dashboard from './components/Dashboard/Dashboard';
 import IncidentForm from './components/IncidentForm/IncidentForm';
 import IncidentList from './components/IncidentList/IncidentList';
+import EditIncidentForm from './components/EditIncidentForm/EditIncidentForm';
 
 function App() {
 
@@ -18,6 +19,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/incidentform" element={<IncidentForm />} />
         <Route path="/incidentlist" element={<IncidentList />} />
+        <Route path="/edit-incident/:id" element={<EditIncidentForm />} />
+
 
       </Routes>
     </Router>

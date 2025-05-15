@@ -62,6 +62,18 @@ const Signup = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+        // If pincode is being cleared, clear address fields too
+        if (name === "pincode" && value === "") {
+            setFormData(prev => ({
+                ...prev,
+                pincode: "",
+                state: "",
+                city: "",
+            }));
+            return;
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: value,
@@ -69,6 +81,42 @@ const Signup = () => {
             ...(name === "state" ? { city: "" } : {}),
         }));
     };
+
+
+    useEffect(() => {
+        const fetchLocationByPincode = async () => {
+            const pincode = formData.pincode;
+            if (/^\d{6}$/.test(pincode)) {
+                try {
+                    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+                    const data = await res.json();
+
+                    if (data[0].Status === "Success") {
+                        const postOffice = data[0].PostOffice[0];
+
+                        const matchedState = states.find(
+                            s => s.name.toLowerCase() === postOffice.State.toLowerCase()
+                        );
+
+                        setFormData(prev => ({
+                            ...prev,
+                            country: "IN",
+                            state: matchedState?.iso2 || "",
+                            city: postOffice.District, // temporarily set district
+                        }));
+                    } else {
+                        console.warn("Invalid Pincode entered");
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch from Postal API:", err);
+                }
+            }
+        };
+
+        fetchLocationByPincode();
+    }, [formData.pincode, states]);
+
+
 
     const validateForm = () => {
         const newErrors = {};
